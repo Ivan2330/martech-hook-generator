@@ -59,17 +59,51 @@ def test_add_rule_keeps_memory_within_budget():
     assert not any(r.startswith("Rule 0:") for r in rules)  # the oldest is gone
 
 
-def test_template_rule_is_positive_and_keeps_reason():
-    liked = memory.template_rule(VARIANT, "hooks", liked=True)
+def test_like_without_reason_makes_no_rule():
+    assert memory.should_make_rule(liked=True, reason="") is False
+    assert memory.should_make_rule(liked=True, reason="   ") is False
+    assert memory.should_make_rule(liked=True, reason="concrete family number") is True
+    assert memory.should_make_rule(liked=False, reason="") is True  # a 👎 always teaches something
+
+
+def test_template_rule_is_general_and_never_quotes_the_variant():
+    liked = memory.template_rule(VARIANT, "hooks", liked=True, reason="a concrete family number")
     disliked = memory.template_rule(VARIANT, "hooks", liked=False, reason="too generic, name a real moment")
-    assert liked == 'Write more hero hooks like "Three kids, forty-two socks.".'
-    assert disliked.startswith("Write hero hooks that take a different direction")
-    assert disliked.endswith(": too generic, name a real moment.")
+    plain_dislike = memory.template_rule(VARIANT, "hooks", liked=False)
+    assert liked == "Write more hooks with a hero angle: a concrete family number."
+    assert disliked == "When writing hero hooks, take this into account: too generic, name a real moment."
+    assert plain_dislike == "Try a fresh direction for hero hooks."
+    for rule in (liked, disliked, plain_dislike):
+        assert VARIANT["text"] not in rule and "forty-two" not in rule
 
 
 def test_make_rule_uses_template_in_demo(monkeypatch):
     monkeypatch.setattr(memory, "get_provider", lambda: "demo")
-    assert memory.make_rule(VARIANT, "hooks", liked=True).startswith("Write more hero hooks")
+    rule = memory.make_rule(VARIANT, "hooks", liked=True, reason="numbers work")
+    assert rule.startswith("Write more hooks with a hero angle")
+
+
+def test_rule_prompt_asks_for_a_general_principle(monkeypatch):
+    prompts = []
+
+    def fake_model(system, user, json_answer=True):
+        prompts.append(system)
+        return "Use real moments."
+
+    monkeypatch.setattr(memory, "get_provider", lambda: "ollama")
+    monkeypatch.setattr(memory, "call_model", fake_model)
+    memory.make_rule(VARIANT, "hooks", liked=True, reason="feels real")
+    assert "general principle that works for any winning script" in prompts[0]
+    assert "without quoting the rated line" in prompts[0]
+
+
+def test_rule_that_quotes_the_variant_falls_back_to_template(monkeypatch):
+    monkeypatch.setattr(memory, "get_provider", lambda: "ollama")
+    monkeypatch.setattr(
+        memory, "call_model", lambda system, user, json_answer=True: 'Write hooks like "Three kids, forty-two socks."'
+    )
+    rule = memory.make_rule(VARIANT, "hooks", liked=True, reason="numbers work")
+    assert rule == "Write more hooks with a hero angle: numbers work."
 
 
 def test_make_rule_asks_model_and_cleans_answer(monkeypatch):

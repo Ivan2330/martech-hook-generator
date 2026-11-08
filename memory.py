@@ -12,7 +12,8 @@ MAX_RULE_CHARS = 300  # one long rule (e.g. a pasted paragraph as "why") must no
 RULE_PROMPT = """A motion designer rated one variation of a SockLock ad line (magnetic socks, US video ads on Meta).
 Turn this feedback into ONE rule for writing future variations, at most 25 words.
 Phrase it as what to do, for example "Open hooks with a concrete number from family life." Positive instructions are easier to follow than bans.
-Generalize from this one line to a pattern, so the rule helps on other scripts too.
+Write a general principle that works for any winning script, in your own words, without quoting the rated line and without its numbers, names or characters.
+A rule tied to one line makes every next brief repeat that line, and Meta treats repeated ads as one ad.
 Reply with the rule only."""
 
 
@@ -45,26 +46,36 @@ def trim_to_budget(rules: list[str], max_tokens: int = MAX_TOKENS) -> list[str]:
     return rules
 
 
+def should_make_rule(liked: bool, reason: str) -> bool:
+    """A 👍 without a reason only says 'this exact line is good', which teaches copying, so it makes no rule."""
+    return not liked or bool(reason.strip())
+
+
 def template_rule(variant: dict, section: str, liked: bool, reason: str = "") -> str:
-    """Make a rule without a model (demo mode): a plain 'do this' sentence built from the variant."""
-    angle, text = variant["angle"], variant["text"]
+    """Make a rule without a model (demo mode): a general sentence from angle, section and reason, never quoting the variant."""
+    angle = variant["angle"]
     if liked:
-        rule = f'Write more {angle} {section} like "{text}"'
+        rule = f"Write more {section} with a {angle} angle"
+    elif reason:
+        rule = f"When writing {angle} {section}, take this into account"
     else:
-        rule = f'Write {angle} {section} that take a different direction from "{text}"'
+        rule = f"Try a fresh direction for {angle} {section}"
     return f"{rule}: {reason}." if reason else f"{rule}."
 
 
 def make_rule(variant: dict, section: str, liked: bool, reason: str = "") -> str:
-    """Turn one 👍/👎 (+ optional reason) into one short positive rule, using the model when there is one."""
+    """Turn one 👍/👎 (+ reason) into one short general rule, using the model when there is one."""
     if get_provider() == "demo":
         return template_rule(variant, section, liked, reason)
     feedback = (
         f"Section: {section}\nAngle: {variant['angle']}\nVariation: {variant['text']}\n"
         f"Rating: {'liked' if liked else 'disliked'}\nDesigner's reason: {reason or 'not given'}"
     )
-    answer = call_model(RULE_PROMPT, feedback, json_answer=False)
-    return answer.strip().splitlines()[0].strip(' "')
+    rule = call_model(RULE_PROMPT, feedback, json_answer=False).strip().splitlines()[0].strip(' "')
+    if variant["text"].lower().strip(" .!?") in rule.lower():
+        # The model copied the line anyway: a general template is safer than a rule that breeds repeats.
+        return template_rule(variant, section, liked, reason)
+    return rule
 
 
 def delete_rule(rule: str) -> list[str]:

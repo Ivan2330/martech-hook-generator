@@ -6,7 +6,16 @@ import streamlit as st
 
 import usage
 from generator import EXAMPLES_DIR, SECTIONS, generate, get_provider
-from memory import MAX_TOKENS, add_rule, delete_rule, estimate_tokens, load_rules, make_rule, template_rule
+from memory import (
+    MAX_TOKENS,
+    add_rule,
+    delete_rule,
+    estimate_tokens,
+    load_rules,
+    make_rule,
+    should_make_rule,
+    template_rule,
+)
 
 SECTION_TITLES = {"hooks": "Хуки (0–3 с)", "first_lines": "Перші фрази після хука", "on_screen": "Текст на екрані"}
 PROVIDER_LABELS = {"demo": "демо: збережена відповідь", "ollama": "Ollama, локально", "anthropic": "Claude API"}
@@ -33,19 +42,22 @@ with st.sidebar:
 
 
 def rate(section: str, key: str, variant: dict, liked: bool, reason: str) -> None:
-    """Turn a 👍/👎 into a rule in shared memory, log it, and remember the card as rated."""
-    with st.spinner("Записую правило в пам'ять…"):
-        try:
-            rule = make_rule(variant, section, liked, reason)
-        except Exception:  # model unavailable: a template rule is better than losing the feedback
-            rule = template_rule(variant, section, liked, reason)
-    add_rule(rule)
+    """Log a 👍/👎, turn it into a rule in shared memory when it carries a lesson, and remember the card as rated."""
+    if should_make_rule(liked, reason):
+        with st.spinner("Записую правило в пам'ять…"):
+            try:
+                rule = make_rule(variant, section, liked, reason)
+            except Exception:  # model unavailable: a template rule is better than losing the feedback
+                rule = template_rule(variant, section, liked, reason)
+        add_rule(rule)
+        st.toast(f"Нове правило: {rule}", icon="🧠")
+    else:
+        st.toast("👍 записано. Правило з 👍 створюється лише з причиною.", icon="👍")
     if not is_demo:
         usage.log_event(designer, "like" if liked else "dislike", section, variant["angle"])
     st.session_state.rated[key] = liked
     if liked:
         st.session_state.liked.append((section, variant))
-    st.toast(f"Нове правило: {rule}", icon="🧠")
     st.rerun()  # redraw so the card shows "rated" and the sidebar shows the new rule
 
 
@@ -63,7 +75,7 @@ def show_card(section: str, index: int, variant: dict) -> None:
             st.caption("✓ Оцінено " + ("👍" if st.session_state.rated[key] else "👎"))
             return
         reason = st.text_input(
-            "Чому?", key=f"why-{key}", placeholder="Чому? Одне речення, необов'язково", label_visibility="collapsed"
+            "Чому?", key=f"why-{key}", placeholder="Чому? Одне речення (для 👍 потрібне, щоб створити правило)", label_visibility="collapsed"
         )
         like_col, dislike_col = st.columns(2)
         if like_col.button("👍", key=f"like-{key}", width="stretch"):
