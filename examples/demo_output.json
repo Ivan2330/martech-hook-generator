@@ -1,0 +1,73 @@
+{
+  "hooks": {
+    "pain": [
+      {"text": "My laundry day is a disaster.", "why": "This highlights the frustration of every day laundry going wrong."},
+      {"text": "I check the machine, no socks inside.", "why": "Shows the direct contradiction between what goes in and what comes out."},
+      {"text": "The only thing missing: socks.", "why": "Creates intrigue and connects directly to the problem."}
+    ],
+    "hero": [
+      {"text": "I'm a college roommate.", "why": "Brings in a relatable character who also struggles with laundry."},
+      {"text": "Every single time — one in, one out.", "why": "Emphasizes the consistent nature of the problem."},
+      {"text": "I'm done with losing socks.", "why": "Expresses the desire for a solution clearly."}
+    ],
+    "format": [
+      {"text": "Washing machine eats socks.", "why": "Repeats the key message in a new way."},
+      {"text": "Laundry day nightmares.", "why": "Describes the common experience of laundry."},
+      {"text": "My sock dilemma.", "why": "Conveys the central problem in a relatable way."}
+    ],
+    "emotion": [
+      {"text": "Frustrated with lost socks.", "why": "Expresses the emotional toll of the problem."},
+      {"text": "Tired of the mismatch.", "why": "Highlights the inconvenience of not having matching socks."},
+      {"text": "Sick of the laundry mess.", "why": "Addresses the broader issue of a messy drawer and time wasted."}
+    ],
+    "voice": [
+      {"text": "That's just wrong, right?", "why": "Deadpan and relatable."},
+      {"text": "Enough is enough.", "why": "Expresses a clear desire for change."},
+      {"text": "I'm not giving up socks.", "why": "Proud and determined."}
+    ]
+  },
+  "first_lines": {
+    "pain": [
+      {"text": "It's one sock in, one out.", "why": "Continues the pain point of the laundry day."},
+      {"text": "Where did my sock go?", "why": "Asks a question to keep the viewer engaged and thinking about the problem."}
+    ],
+    "hero": [
+      {"text": "I'm sick of losing socks.", "why": "Expresses the main problem and the desire for a solution."},
+      {"text": "I found a solution.", "why": "Introduces a resolution to the problem."}
+    ],
+    "format": [
+      {"text": "Washing machine's sock theft.", "why": "Repeats the key message in a new way."},
+      {"text": "My sock disappearing act.", "why": "Describes the problem in a different angle."}
+    ],
+    "emotion": [
+      {"text": "Exhausted from the laundry.", "why": "Expresses the physical and mental toll of the chore."},
+      {"text": "Frustrated with mismatched socks.", "why": "Highlights the inconvenience of not having matching socks."}
+    ],
+    "voice": [
+      {"text": "No more, I swear.", "why": "Expresses a clear desire for change."},
+      {"text": "I'm done with this.", "why": "Proud and determined."}
+    ]
+  },
+  "on_screen": {
+    "pain": [
+      {"text": "Where's my sock?", "why": "Asks a question to keep the viewer engaged and thinking about the problem."},
+      {"text": "One in, one out.", "why": "Reiterates the problem clearly."}
+    ],
+    "hero": [
+      {"text": "I found a solution.", "why": "Introduces a resolution to the problem."},
+      {"text": "No more losing socks.", "why": "Expresses the main problem and the desire for a solution."}
+    ],
+    "format": [
+      {"text": "Washing machine's sock problem.", "why": "Repeats the key message in a new way."},
+      {"text": "My sock dilemma.", "why": "Conveys the central problem in a relatable way."}
+    ],
+    "emotion": [
+      {"text": "Enough is enough.", "why": "Expresses the emotional state of frustration."},
+      {"text": "No more lost socks.", "why": "Expresses a clear desire for change."}
+    ],
+    "voice": [
+      {"text": "Time to stop the loss.", "why": "Expresses the determination to solve the problem."},
+      {"text": "Socks stay together now.", "why": "Expresses the solution clearly."}
+    ]
+  }
+}
